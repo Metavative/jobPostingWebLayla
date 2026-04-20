@@ -271,7 +271,7 @@ export default function HomePage() {
             </div>
 
             <div className="cta_actions_row">
-              <Link href="/contact" className="header_primary_btn">
+              <Link href="/post-job" className="header_primary_btn">
                 Post a Job
               </Link>
               <Link href="/companies" className="header_link_btn">

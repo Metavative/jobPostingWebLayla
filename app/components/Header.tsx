@@ -22,7 +22,6 @@ export default function Header() {
           <span className="brand_mark">J</span>
           <div className="brand_text_wrap">
             <span className="brand_text">JobNest</span>
-            <br />
             <span className="brand_subtext">Find work faster</span>
           </div>
         </Link>
@@ -43,7 +42,7 @@ export default function Header() {
             Sign Up
           </Link>
 
-          <Link href="/contact" className="header_primary_btn">
+          <Link href="/post-job" className="header_primary_btn">
             Post a Job
           </Link>
 
@@ -75,7 +74,7 @@ export default function Header() {
                 </Link>
               </li>
               <li>
-                <Link href="/contact" onClick={() => setOpen(false)}>
+                <Link href="/post-job" onClick={() => setOpen(false)}>
                   Post a Job
                 </Link>
               </li>
