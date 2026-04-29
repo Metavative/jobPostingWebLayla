@@ -104,10 +104,6 @@ export default function Header() {
             </>
           )}
 
-          <Link href="/contact" className="sep_primary_btn">
-            Job Post
-          </Link>
-
           <button
             type="button"
             className="sep_mobile_btn"
