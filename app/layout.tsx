@@ -1,7 +1,13 @@
-import "./globals.css";
 import type { Metadata } from "next";
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
+import { Jost } from "next/font/google";
+import "./globals.css";
+import SiteChrome from "@/app/components/SiteChrome";
+
+const jost = Jost({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-jost",
+});
 
 export const metadata: Metadata = {
   title: "JobNest",
@@ -10,15 +16,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="en" className={jost.variable}>
       <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

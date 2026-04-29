@@ -1,19 +1,29 @@
 export default function PostJobPage() {
   return (
-    <section className="post_job_section">
+    <section className="post_job_section premium_detail_section">
       <div className="container">
         <div className="page_heading_block">
           <span className="section_eyebrow">For Employers</span>
           <h1>Post a new job</h1>
           <p>
-            Create a job listing with role details, company information, salary,
-            and requirements so candidates can apply quickly.
+            Create a strong listing with clear role details, salary, skills,
+            and application info so quality candidates can apply faster.
           </p>
         </div>
 
         <div className="post_job_layout">
-          <div className="post_job_main polished_card">
-            <h2>Job Information</h2>
+          <div className="post_job_main polished_card premium_form_card">
+            <div className="premium_form_head">
+              <div>
+                <span className="section_eyebrow">Job Form</span>
+                <h2>Job information</h2>
+              </div>
+
+              <div className="form_status_pill">
+                <span className="live_dot"></span>
+                <span>Draft ready</span>
+              </div>
+            </div>
 
             <form className="post_job_form">
               <div className="post_job_form_grid">
@@ -104,8 +114,8 @@ export default function PostJobPage() {
           </div>
 
           <aside className="post_job_sidebar">
-            <div className="post_job_side_card polished_card">
-              <h3>Posting Tips</h3>
+            <div className="post_job_side_card polished_card premium_info_card">
+              <h3>Posting tips</h3>
               <ul className="post_job_tip_list">
                 <li>Use a clear and specific job title</li>
                 <li>Keep salary range transparent</li>
@@ -115,7 +125,7 @@ export default function PostJobPage() {
               </ul>
             </div>
 
-            <div className="post_job_side_card polished_card">
+            <div className="post_job_side_card polished_card premium_info_card">
               <h3>Why post here?</h3>
               <div className="post_job_stats">
                 <div className="post_job_stat_item">
@@ -129,6 +139,20 @@ export default function PostJobPage() {
                 <div className="post_job_stat_item">
                   <strong>1.4k+</strong>
                   <span>Hiring companies</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="post_job_side_card polished_card premium_info_card">
+              <h3>Hiring support</h3>
+              <div className="mini_jobs_list">
+                <div className="mini_job_item static_item">
+                  <strong>Response time</strong>
+                  <span>Within 24 hours</span>
+                </div>
+                <div className="mini_job_item static_item">
+                  <strong>Ad review</strong>
+                  <span>Manual quality check</span>
                 </div>
               </div>
             </div>
