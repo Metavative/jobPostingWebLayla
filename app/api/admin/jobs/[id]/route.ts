@@ -1,5 +1,4 @@
 import { prisma } from "../../../../lib/prisma";
-import type { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 type Context = {
@@ -115,15 +114,14 @@ export async function DELETE(
       );
     }
 
-    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      await tx.application.deleteMany({
+    await prisma.$transaction([
+      prisma.application.deleteMany({
         where: { jobId: id },
-      });
-
-      await tx.job.delete({
+      }),
+      prisma.job.delete({
         where: { id },
-      });
-    });
+      }),
+    ]);
 
     return NextResponse.json(
       {
