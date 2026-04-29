@@ -2,6 +2,9 @@ import { prisma } from "@/app/lib/prisma";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { sendMail } from "@/app/lib/mailer";
 import { NextRequest, NextResponse } from "next/server";
+import { professionalEmailTemplate } from "@/app/lib/email-template";
+
+
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -70,20 +73,34 @@ export async function PATCH(request: NextRequest, context: Context) {
     });
 
     if (status === "APPROVED") {
-      await sendMail({
-        to: updated.email,
-        subject: `Application approved for ${updated.job.title}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-            <h2>Application approved</h2>
-            <p>Hi ${updated.fullName},</p>
-            <p>Your application for <strong>${updated.job.title}</strong> at <strong>${updated.job.companyName || "the hiring company"}</strong> has been approved.</p>
-            <p>You can check your Applied tab for the updated status.</p>
-            <p>Thank you.</p>
-          </div>
-        `,
-      });
-    }
+  await sendMail({
+    to: updated.email,
+    subject: `Application approved for ${updated.job.title}`,
+    html: professionalEmailTemplate({
+      title: "Your Application Has Been Approved",
+      previewText: `Application approved for ${updated.job.title}`,
+      greeting: `Hi ${updated.fullName},`,
+      body: `
+        <p style="margin:0 0 14px;">
+          Great news. Your application for 
+          <strong>${updated.job.title}</strong> at 
+          <strong>${updated.job.companyName || "the hiring company"}</strong> 
+          has been approved.
+        </p>
+
+        <p style="margin:0 0 14px;">
+          Our team will contact you soon with the next steps.
+        </p>
+
+        <p style="margin:0;">
+          You can also track your application status from your dashboard.
+        </p>
+      `,
+      buttonText: "View Applied Jobs",
+      buttonUrl: `${process.env.NEXT_PUBLIC_APP_URL}/applied`,
+    }),
+  });
+}
 
     return NextResponse.json(
       {

@@ -2141,7 +2141,7 @@ main {
   border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
-  color: #ffffff;
+  color: #000000;
   font-size: 24px;
   line-height: 1;
 }
@@ -3934,7 +3934,7 @@ textarea,
 select {
   background: #ffffff !important;
   color: #20242b !important;
-  border: 1px solid #dbe7f3 !important;
+  /* border: 1px solid #dbe7f3 !important; */
 }
 
 input::placeholder,
@@ -7863,4 +7863,36 @@ textarea::placeholder {
   .admin_enq_modal_grid {
     grid-template-columns: 1fr;
   }
+}
+.jp_job_card {
+  border: 1px solid #e6edf5;
+}
+
+.jp_job_active {
+  border-color: #e6edf5 !important;
+}
+
+.jp_job_bookmark_btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #dce5f1;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #667386;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.jp_job_bookmark_btn.saved {
+  color: #1967d2;
+  background: #edf5ff;
+  border-color: #1967d2;
+}
+.newsletter_message {
+  margin-top: 8px;
+  color: #ffffff !important;
+  font-size: 13px;
+  font-weight: 700;
 }

@@ -75,6 +75,26 @@ export default function HomePage() {
   const [keyword, setKeyword] = useState("");
   const [where, setWhere] = useState("");
   const [loading, setLoading] = useState(true);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+const [notice, setNotice] = useState("");
+const [newsletterEmail, setNewsletterEmail] = useState("");
+const [newsletterMessage, setNewsletterMessage] = useState("");
+
+const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  if (!newsletterEmail.trim()) {
+    setNewsletterMessage("Please enter your email.");
+    return;
+  }
+
+  setNewsletterMessage("Thank you for subscribing.");
+  setNewsletterEmail("");
+
+  setTimeout(() => {
+    setNewsletterMessage("");
+  }, 2500);
+};
 
   const fetchJobs = async () => {
     try {
@@ -96,7 +116,58 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchJobs();
+    fetchSavedJobs();
   }, []);
+
+  const fetchSavedJobs = async () => {
+  try {
+    const response = await fetch("/api/user/saved-jobs", {
+      credentials: "include",
+      cache: "no-store",
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      const ids = (result.data || []).map(
+        (item: { job: { id: string } }) => item.job.id
+      );
+
+      setSavedIds(ids);
+    }
+  } catch {
+    setSavedIds([]);
+  }
+};
+const toggleSave = async (jobId: string) => {
+  try {
+    const response = await fetch("/api/user/saved-jobs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ jobId }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      setNotice(result.message || "Please login before saving a job");
+      return;
+    }
+
+    setSavedIds((prev) =>
+      result.saved ? [...prev, jobId] : prev.filter((id) => id !== jobId)
+    );
+
+    setNotice(result.message || "Saved status updated");
+  } catch {
+    setNotice("Something went wrong");
+  }
+
+  setTimeout(() => setNotice(""), 1800);
+};
 
   const featuredJobs = jobs.slice(0, 6);
 
@@ -232,62 +303,70 @@ export default function HomePage() {
       </section>
 
       <section className="jp_featured_jobs">
-        <div className="jp_container">
-          <div className="jp_center_head">
-            <h2>Featured Jobs</h2>
-            <p>Know your worth and find the job that qualify your life</p>
-          </div>
+  <div className="jp_container">
+    <div className="jp_center_head">
+      <h2>Featured Jobs</h2>
+      <p>Know your worth and find the job that qualify your life</p>
+    </div>
 
-          {loading ? (
-            <div className="jp_jobs_grid">
-              <div className="jp_job_skeleton"></div>
-              <div className="jp_job_skeleton"></div>
-              <div className="jp_job_skeleton"></div>
-              <div className="jp_job_skeleton"></div>
-            </div>
-          ) : featuredJobs.length === 0 ? (
-            <div className="jp_empty_card">
-              <h3>No jobs added yet</h3>
-              <p>Jobs from admin panel will appear here.</p>
-            </div>
-          ) : (
-            <div className="jp_jobs_grid">
-              {featuredJobs.map((job, index) => (
-                <div
-                  className={`jp_job_card ${index === 1 ? "jp_job_active" : ""}`}
-                  key={job.id}
-                >
-                  <div className="jp_job_top">
-                    <div className="jp_job_logo">
-                      {job.companyName
-                        ? job.companyName.charAt(0)
-                        : job.title.charAt(0)}
-                    </div>
+    {loading ? (
+      <div className="jp_jobs_grid">
+        <div className="jp_job_skeleton"></div>
+        <div className="jp_job_skeleton"></div>
+        <div className="jp_job_skeleton"></div>
+        <div className="jp_job_skeleton"></div>
+      </div>
+    ) : featuredJobs.length === 0 ? (
+      <div className="jp_empty_card">
+        <h3>No jobs added yet</h3>
+        <p>Jobs from admin panel will appear here.</p>
+      </div>
+    ) : (
+      <div className="jp_jobs_grid">
+        {featuredJobs.map((job) => {
+          const isSaved = savedIds.includes(job.id);
 
-                    <div>
-                      <h3>
-                        <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
-                      </h3>
-                      <p>
-                        by {job.companyName || "Company"} in{" "}
-                        {job.category || "General"}
-                      </p>
-                    </div>
-
-                    <span className="jp_job_bookmark">♡</span>
-                  </div>
-
-                  <div className="jp_job_meta">
-                    <span>{job.employmentType}</span>
-                    <span>{job.location}</span>
-                    <span>{job.salary || "Salary not specified"}</span>
-                  </div>
+          return (
+            <div className="jp_job_card" key={job.id}>
+              <div className="jp_job_top">
+                <div className="jp_job_logo">
+                  {job.companyName
+                    ? job.companyName.charAt(0)
+                    : job.title.charAt(0)}
                 </div>
-              ))}
+
+                <div>
+                  <h3>
+                    <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
+                  </h3>
+                  <p>
+                    by {job.companyName || "Company"} in{" "}
+                    {job.category || "General"}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className={`jp_job_bookmark_btn ${isSaved ? "saved" : ""}`}
+                  onClick={() => toggleSave(job.id)}
+                  aria-label="Save job"
+                >
+                  {isSaved ? "♥" : "♡"}
+                </button>
+              </div>
+
+              <div className="jp_job_meta">
+                <span>{job.employmentType}</span>
+                <span>{job.location}</span>
+                <span>{job.salary || "Salary not specified"}</span>
+              </div>
             </div>
-          )}
-        </div>
-      </section>
+          );
+        })}
+      </div>
+    )}
+  </div>
+</section>
 
       <section className="jp_brand_collab">
         <div className="jp_container">
@@ -411,23 +490,32 @@ export default function HomePage() {
       </section>
 
       <section className="jp_newsletter">
-        <div className="jp_container jp_newsletter_grid">
-          <img src={Newsletter.src} alt="Newsletter" />
+  <div className="jp_container jp_newsletter_grid">
+    <img src={Newsletter.src} alt="Newsletter" />
 
-          <div>
-            <h2>Subscribe Our Newsletter</h2>
-            <p>
-              Advertise your jobs to millions of monthly users and search 15.8
-              million CVs in our database.
-            </p>
-          </div>
+    <div>
+      <h2>Subscribe Our Newsletter</h2>
+      <p>
+        Advertise your jobs to millions of monthly users and search 15.8
+        million CVs in our database.
+      </p>
 
-          <form>
-            <input type="email" placeholder="Your email" />
-            <button type="button">Subscribe</button>
-          </form>
-        </div>
-      </section>
+      {newsletterMessage ? (
+        <p className="newsletter_message">{newsletterMessage}</p>
+      ) : null}
+    </div>
+
+    <form onSubmit={handleNewsletterSubmit}>
+      <input
+        type="email"
+        placeholder="Your email"
+        value={newsletterEmail}
+        onChange={(e) => setNewsletterEmail(e.target.value)}
+      />
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+</section>
     </>
   );
 }

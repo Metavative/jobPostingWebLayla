@@ -4,6 +4,7 @@ import { sendMail } from "@/app/lib/mailer";
 import { NextRequest, NextResponse } from "next/server";
 import { mkdir, stat, writeFile } from "fs/promises";
 import path from "path";
+import { professionalEmailTemplate } from "@/app/lib/email-template";
 
 export const runtime = "nodejs";
 
@@ -152,39 +153,86 @@ export async function POST(request: NextRequest) {
     const companyName = job.companyName || "the hiring company";
     const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
 
-    await Promise.allSettled([
-      sendMail({
-        to: email,
-        subject: `Application submitted for ${job.title}`,
-        html: `
-          <div style="font-family:Arial,sans-serif;line-height:1.6">
-            <h2>Application submitted</h2>
-            <p>Hi ${fullName},</p>
-            <p>You have just applied for <strong>${job.title}</strong> at <strong>${companyName}</strong>.</p>
-            <p>Your application is currently marked as <strong>Pending</strong>. You can check your Applied tab for updates.</p>
-            <p>Thank you for applying.</p>
-          </div>
-        `,
-      }),
 
-      adminEmail
-        ? sendMail({
-            to: adminEmail,
-            subject: `New application received: ${job.title}`,
-            html: `
-              <div style="font-family:Arial,sans-serif;line-height:1.6">
-                <h2>New job application</h2>
-                <p><strong>Candidate:</strong> ${fullName}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Phone:</strong> ${phone || "Not provided"}</p>
-                <p><strong>Job:</strong> ${job.title}</p>
-                <p><strong>Company:</strong> ${companyName}</p>
-                <p><strong>Message:</strong> ${message || "No message provided"}</p>
-              </div>
-            `,
-          })
-        : Promise.resolve(),
-    ]);
+
+await Promise.allSettled([
+  // ✅ USER EMAIL
+  sendMail({
+    to: email,
+    subject: `Application submitted for ${job.title}`,
+    html: professionalEmailTemplate({
+      title: "Application Submitted Successfully",
+      previewText: `You applied for ${job.title}`,
+      greeting: `Hi ${fullName},`,
+      body: `
+        <p style="margin:0 0 14px;">
+          Your application for 
+          <strong>${job.title}</strong> at 
+          <strong>${companyName}</strong> has been submitted successfully.
+        </p>
+
+        <p style="margin:0 0 14px;">
+          Your application is currently marked as <strong>Pending</strong>.
+          Our team will review it and update your status accordingly.
+        </p>
+
+        <p style="margin:0;">
+          You can track your application anytime from your dashboard.
+        </p>
+      `,
+      buttonText: "View Applied Jobs",
+      buttonUrl: `${process.env.NEXT_PUBLIC_APP_URL}/applied`,
+    }),
+  }),
+
+  // ✅ ADMIN EMAIL
+  adminEmail
+    ? sendMail({
+        to: adminEmail,
+        subject: `New application received: ${job.title}`,
+        html: professionalEmailTemplate({
+          title: "New Job Application Received",
+          previewText: `${fullName} applied for ${job.title}`,
+          greeting: `Hello Admin,`,
+          body: `
+            <p style="margin:0 0 14px;">
+              A new application has been submitted on SCP Professional.
+            </p>
+
+            <div style="background:#f7fbff;border:1px solid #dce5f1;border-radius:8px;padding:16px;margin:18px 0;">
+              <strong>Candidate Details:</strong>
+              <p style="margin:8px 0 0;">Name: ${fullName}</p>
+              <p style="margin:4px 0;">Email: ${email}</p>
+              <p style="margin:4px 0;">Phone: ${phone || "Not provided"}</p>
+            </div>
+
+            <div style="background:#edf5ff;border:1px solid #dce5f1;border-radius:8px;padding:16px;">
+              <strong>Job Details:</strong>
+              <p style="margin:8px 0 0;">Position: ${job.title}</p>
+              <p style="margin:4px 0;">Company: ${companyName}</p>
+            </div>
+
+            ${
+              message
+                ? `
+                <div style="margin-top:18px;">
+                  <strong>Candidate Message:</strong>
+                  <p style="margin-top:6px;">${message}</p>
+                </div>
+              `
+                : ""
+            }
+
+            <p style="margin-top:16px;">
+              Please review the application from the admin dashboard.
+            </p>
+          `,
+          buttonText: "Open Admin Dashboard",
+          buttonUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/applications`,
+        }),
+      })
+    : Promise.resolve(),
+]);
 
     return NextResponse.json(
       {

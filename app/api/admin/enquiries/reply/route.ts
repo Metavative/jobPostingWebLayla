@@ -2,6 +2,8 @@ import { prisma } from "@/app/lib/prisma";
 import { requireAdmin } from "@/app/lib/admin-auth";
 import { sendMail } from "@/app/lib/mailer";
 import { NextRequest, NextResponse } from "next/server";
+import { professionalEmailTemplate } from "@/app/lib/email-template";
+
 
 export async function POST(request: NextRequest) {
   const auth = requireAdmin(request);
@@ -39,26 +41,37 @@ export async function POST(request: NextRequest) {
 
     // send email to user
     await sendMail({
-      to: enquiry.email,
-      subject: `Reply to your enquiry`,
-      html: `
-        <div style="font-family:Arial,sans-serif;line-height:1.6">
-          <h2>Hello ${enquiry.name},</h2>
-          <p>Thank you for reaching out.</p>
+  to: enquiry.email,
+  subject: "Reply to your enquiry",
+  html: professionalEmailTemplate({
+    title: "Reply To Your Enquiry",
+    previewText: "SCP Professional has responded to your message",
+    greeting: `Hi ${enquiry.name},`,
+    body: `
+      <p style="margin:0 0 14px;">
+        Thank you for contacting SCP Professional. Our team has reviewed your enquiry.
+      </p>
 
-          <p><strong>Your message:</strong></p>
-          <p>${enquiry.message}</p>
+      <div style="background:#f7fbff;border:1px solid #dce5f1;border-radius:8px;padding:16px;margin:18px 0;">
+        <strong style="color:#111827;">Your message:</strong>
+        <p style="margin:8px 0 0;color:#53606f;">
+          ${enquiry.message}
+        </p>
+      </div>
 
-          <hr />
+      <div style="background:#edf5ff;border:1px solid #dce5f1;border-radius:8px;padding:16px;">
+        <strong style="color:#111827;">Our reply:</strong>
+        <p style="margin:8px 0 0;color:#53606f;">
+          ${replyMessage}
+        </p>
+      </div>
 
-          <p><strong>Our reply:</strong></p>
-          <p>${replyMessage}</p>
-
-          <br />
-          <p>Regards,<br/>JobNest Team</p>
-        </div>
-      `,
-    });
+      <p style="margin:16px 0 0;">
+        If you have any further questions, feel free to reply to this email.
+      </p>
+    `,
+  }),
+});
 
     return NextResponse.json(
       {

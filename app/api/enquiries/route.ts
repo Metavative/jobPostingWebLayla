@@ -1,6 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { sendMail } from "@/app/lib/mailer";
 import { NextRequest, NextResponse } from "next/server";
+import { professionalEmailTemplate } from "@/app/lib/email-template";
 
 function normalizeType(value: string) {
   const cleaned = value.trim().toUpperCase();
@@ -44,22 +45,41 @@ export async function POST(request: NextRequest) {
     const adminEmail = process.env.ADMIN_NOTIFY_EMAIL;
 
     if (adminEmail) {
-      await sendMail({
-        to: adminEmail,
-        subject: `New enquiry from ${name}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-            <h2>New enquiry received</h2>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Type:</strong> ${type}</p>
-            <p><strong>Subject:</strong> ${subject || "No subject"}</p>
-            <p><strong>Message:</strong></p>
-            <p>${message}</p>
-          </div>
-        `,
-      });
-    }
+  await sendMail({
+    to: adminEmail,
+    subject: `New enquiry from ${name}`,
+    html: professionalEmailTemplate({
+      title: "New Enquiry Received",
+      previewText: `${name} submitted a new enquiry`,
+      greeting: `Hello Admin,`,
+      body: `
+        <p style="margin:0 0 14px;">
+          A new enquiry has been submitted on SCP Professional.
+        </p>
+
+        <div style="background:#f7fbff;border:1px solid #dce5f1;border-radius:8px;padding:16px;margin:18px 0;">
+          <strong>User Details:</strong>
+          <p style="margin:8px 0 0;">Name: ${name}</p>
+          <p style="margin:4px 0;">Email: ${email}</p>
+          <p style="margin:4px 0;">Type: ${type}</p>
+        </div>
+
+        <div style="background:#edf5ff;border:1px solid #dce5f1;border-radius:8px;padding:16px;">
+          <strong>Enquiry Details:</strong>
+          <p style="margin:8px 0 0;">Subject: ${subject || "No subject"}</p>
+          <p style="margin:8px 0 0;">Message:</p>
+          <p style="margin-top:6px;">${message}</p>
+        </div>
+
+        <p style="margin-top:16px;">
+          Please review and respond from the admin dashboard.
+        </p>
+      `,
+      buttonText: "Open Enquiries",
+      buttonUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/enquiries`,
+    }),
+  });
+}
 
     return NextResponse.json(
       {
