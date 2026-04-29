@@ -68,12 +68,12 @@ export async function GET(request: NextRequest) {
     ]);
 
     const latestActivity = [
-      ...latestApplications.map((item) => ({
+      ...latestApplications.map((item: (typeof latestApplications)[number]) => ({
         id: item.id,
         text: `New application received for ${item.job.title}`,
         createdAt: item.createdAt,
       })),
-      ...latestEnquiries.map((item) => ({
+      ...latestEnquiries.map((item: (typeof latestEnquiries)[number]) => ({
         id: item.id,
         text: `New ${item.type.toLowerCase()} enquiry from ${item.name}`,
         createdAt: item.createdAt,
